@@ -10,6 +10,8 @@ from .views import (
     SessionDetailView,
     SessionEndView,
     SessionJoinView,
+    SessionReportView,
+    SessionResultsCsvView,
     SessionResultsView,
     SessionStartView,
     SoloResultView,
@@ -26,4 +28,6 @@ urlpatterns = [
     re_path(rf"^{UUID}/start$", SessionStartView.as_view(), name="session-start"),
     re_path(rf"^{UUID}/end$", SessionEndView.as_view(), name="session-end"),
     re_path(rf"^{UUID}/results$", SessionResultsView.as_view(), name="session-results"),
+    re_path(rf"^{UUID}/results\.csv$", SessionResultsCsvView.as_view(), name="session-results-csv"),
+    re_path(rf"^{UUID}/report$", SessionReportView.as_view(), name="session-report"),
 ]

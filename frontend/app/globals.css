@@ -75,6 +75,19 @@ h1, h2, h3, .font-display {
   font-family: var(--font-display), var(--font-sans), sans-serif;
 }
 
+/* Chop etish (PDF): sidebar/tugmalarni yashirib, faqat kontentni ko'rsatadi */
+@media print {
+  aside,
+  header,
+  button {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
+
 /* Yumshoq, rang-barang gradient fon (landing / auth / play) */
 .bg-app-gradient {
   background:

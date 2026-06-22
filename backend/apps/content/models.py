@@ -117,3 +117,21 @@ class ContentItem(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Favorite(models.Model):
+    """O'qituvchining sevimli kontenti."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites"
+    )
+    content = models.ForeignKey(
+        ContentItem, on_delete=models.CASCADE, related_name="favorited_by"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "content_favorite"
+        unique_together = [("user", "content")]
+        ordering = ["-created_at"]

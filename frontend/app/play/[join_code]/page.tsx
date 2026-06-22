@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { playSound } from "@/lib/sound";
 import { api } from "@/lib/api";
 import { SessionSocket, type ServerEvent } from "@/lib/socket";
 import type { SessionMode } from "@/types/api";
@@ -16,6 +17,7 @@ type Phase = "name" | "waiting" | "question" | "answered" | "ended";
 interface CurrentQuestion {
   index: number;
   text: string;
+  image: string | null;
   options: string[];
   timeLimit: number;
 }
@@ -80,10 +82,15 @@ export default function StudentPlayPage({
   function handleEvent(ev: ServerEvent) {
     switch (ev.type) {
       case "question_show": {
-        const q = ev.question as { text?: string; options?: string[] };
+        const q = ev.question as {
+          text?: string;
+          options?: string[];
+          image?: string | null;
+        };
         setQuestion({
           index: ev.index,
           text: q.text ?? "",
+          image: q.image ?? null,
           options: q.options ?? [],
           timeLimit: ev.time_limit,
         });
@@ -97,6 +104,7 @@ export default function StudentPlayPage({
         setLastResult({ correct: ev.correct, delta: ev.score_delta });
         setMyScore((s) => s + ev.score_delta);
         setPhase("answered");
+        playSound(ev.correct ? "correct" : "wrong");
         break;
       case "leaderboard_update":
         setLeaderboard(ev.rankings);
@@ -104,6 +112,7 @@ export default function StudentPlayPage({
       case "game_ended":
         setLeaderboard(ev.final_results);
         setPhase("ended");
+        playSound("win");
         break;
       case "error":
         setError(ev.detail);
@@ -175,6 +184,7 @@ export default function StudentPlayPage({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ism Familiya"
+                  maxLength={64}
                   autoFocus
                 />
               </div>
@@ -288,6 +298,14 @@ export default function StudentPlayPage({
       {question && (
         <Card>
           <CardContent className="pt-6">
+            {question.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={question.image}
+                alt=""
+                className="mb-4 max-h-56 w-full rounded-xl object-contain"
+              />
+            )}
             <h2 className="mb-5 font-display text-xl font-bold">{question.text}</h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {question.options.map((opt, i) => (

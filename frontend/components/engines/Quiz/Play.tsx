@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import type { QuizData } from "@/types/engines";
 import type { PlayProps } from "../types";
@@ -60,12 +61,16 @@ export function QuizPlay({ data, onFinish }: PlayProps<QuizData>) {
     if (i === q.answer) {
       const bonus = Math.round(500 + (remaining / limit) * 500);
       setScore((s) => s + bonus);
+      playSound("correct");
+    } else {
+      playSound("wrong");
     }
   }
 
   function next() {
     if (index + 1 >= total) {
       setFinished(true);
+      playSound("win");
       onFinish?.(score);
     } else {
       setIndex((i) => i + 1);
@@ -130,6 +135,14 @@ export function QuizPlay({ data, onFinish }: PlayProps<QuizData>) {
         >
           <Card>
             <CardContent className="pt-6">
+              {q.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={q.image}
+                  alt=""
+                  className="mb-4 max-h-56 w-full rounded-xl object-contain"
+                />
+              )}
               <h2 className="mb-5 font-display text-xl font-bold">{q.text}</h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {q.options.map((opt, i) => {

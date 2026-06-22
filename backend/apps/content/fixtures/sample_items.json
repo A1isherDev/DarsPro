@@ -208,5 +208,26 @@
         "grid_size": 10
       }
     }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-00000000000d",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000003",
+      "engine": "b2000000-0000-4000-8000-00000000000b",
+      "created_by": null,
+      "title": "Tirik organizmlar — to'g'ri/noto'g'ri",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-16T09:00:00Z",
+      "data": {
+        "statements": [
+          {"text": "O'simliklar fotosintez qiladi.", "answer": true},
+          {"text": "Baliqlar o'pka bilan nafas oladi.", "answer": false},
+          {"text": "Hujayra tirik organizmning asosiy birligi.", "answer": true}
+        ]
+      }
+    }
   }
 ]

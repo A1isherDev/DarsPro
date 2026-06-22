@@ -4,10 +4,16 @@ Host (token bilan) o'yinni boshqaradi; o'quvchilar (tokensiz) qo'shiladi va
 javob yuboradi. Joriy savol indeksi Redis cache'da saqlanadi (barcha ulanishlar
 uchun umumiy).
 """
+import time
+
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.core.cache import cache
+
+MAX_NAME_LEN = 64
+RATE_WINDOW = 10.0  # soniya
+RATE_MAX = 25  # oynada maksimal xabar
 
 
 def _group_name(join_code):
@@ -30,6 +36,7 @@ class SessionConsumer(AsyncJsonWebsocketConsumer):
             return
 
         self.session_id = session["id"]
+        self.max_players = session.get("max_players", 30)
         user = self.scope.get("user")
         self.is_host = (
             user is not None
@@ -44,7 +51,17 @@ class SessionConsumer(AsyncJsonWebsocketConsumer):
         if hasattr(self, "group"):
             await self.channel_layer.group_discard(self.group, self.channel_name)
 
+    def _rate_ok(self):
+        """Yengil per-connection rate-limit (spam'dan himoya)."""
+        now = time.monotonic()
+        recent = [t for t in getattr(self, "_msg_times", []) if now - t < RATE_WINDOW]
+        recent.append(now)
+        self._msg_times = recent
+        return len(recent) <= RATE_MAX
+
     async def receive_json(self, content, **kwargs):
+        if not self._rate_ok():
+            return  # juda tez-tez — e'tiborsiz qoldiramiz
         event = content.get("type")
         handler = {
             "player_join": self._on_player_join,
@@ -62,13 +79,21 @@ class SessionConsumer(AsyncJsonWebsocketConsumer):
     # --- Client → Server handlerlari ---
 
     async def _on_player_join(self, content):
-        name = (content.get("display_name") or "").strip()
+        name = (content.get("display_name") or "").strip()[:MAX_NAME_LEN]
         if not name:
             await self.send_json({"type": "error", "detail": "Ism kiritilmadi."})
             return
-        participant = await self._create_participant(
-            self.session_id, name, content.get("team_number")
-        )
+        if self.participant_id is None:
+            count = await self._participant_count(self.session_id)
+            if count >= self.max_players:
+                await self.send_json(
+                    {"type": "error", "detail": "O'yin to'lgan — joy qolmadi."}
+                )
+                return
+        team = content.get("team_number")
+        if team is not None and not isinstance(team, int):
+            team = None
+        participant = await self._create_participant(self.session_id, name, team)
         self.participant_id = participant["id"]
         total = await self._participant_count(self.session_id)
         await self.channel_layer.group_send(
@@ -179,6 +204,7 @@ class SessionConsumer(AsyncJsonWebsocketConsumer):
             "host_user_id": str(s.host_user_id),
             "engine_slug": s.content.engine.slug,
             "data": s.content.data,
+            "max_players": s.max_players,
         }
 
     @database_sync_to_async

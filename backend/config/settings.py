@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "channels",
+    "drf_spectacular",
+    "django_prometheus",
     # Loyiha applari
     "apps.users",
     "apps.content",
@@ -49,6 +51,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
+    "config.middleware.RequestIDMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -57,6 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -115,9 +120,14 @@ else:
 AUTH_USER_MODEL = "users.User"
 
 AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# So'rov tanasi hajmi chegarasi (DoS oldini olish)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024  # 3MB
 
 # --- DRF ---
 REST_FRAMEWORK = {
@@ -129,6 +139,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # Rate limiting — brute-force va spamdan himoya
     "DEFAULT_THROTTLE_CLASSES": (
         "rest_framework.throttling.AnonRateThrottle",
@@ -171,7 +182,34 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# --- Media (rasmlar) ---
+# Dev: lokal fayl tizimi. Prod: S3-mos storage env orqali ulanadi
+# (DEFAULT_FILE_STORAGE + django-storages). MAX_UPLOAD_MB cheklov.
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+MAX_UPLOAD_MB = env.int("MAX_UPLOAD_MB", default=5)
+if TESTING:
+    import tempfile
+
+    MEDIA_ROOT = Path(tempfile.mkdtemp(prefix="darspro_media_"))
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- API hujjat (drf-spectacular) ---
+SPECTACULAR_SETTINGS = {
+    "TITLE": "DarsPro API",
+    "DESCRIPTION": "O'qituvchilar uchun o'yin platformasi — REST API.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # Enum nomlari to'qnashuvini oldini olish
+    "ENUM_NAME_OVERRIDES": {
+        "PlanEnum": "apps.users.models.Plan",
+        "ContentStatusEnum": "apps.content.models.ContentStatus",
+        "ContentSourceEnum": "apps.content.models.ContentSource",
+        "SessionModeEnum": "apps.sessions.models.SessionMode",
+        "SessionStatusEnum": "apps.sessions.models.SessionStatus",
+    },
+}
 
 # --- Celery (vazifa navbati + beat) ---
 from celery.schedules import crontab  # noqa: E402
@@ -194,6 +232,7 @@ CELERY_BEAT_SCHEDULE = {
 
 # --- Logging ---
 LOG_LEVEL = env("LOG_LEVEL", default="INFO")
+LOG_FORMAT = env("LOG_FORMAT", default="text")  # "json" -> structured
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -202,11 +241,14 @@ LOGGING = {
             "format": "{asctime} {levelname} {name}: {message}",
             "style": "{",
         },
+        "json": {
+            "()": "config.middleware.JsonFormatter",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": "json" if LOG_FORMAT == "json" else "verbose",
         },
     },
     "root": {"handlers": ["console"], "level": "WARNING"},
@@ -229,6 +271,20 @@ LOGGING = {
 if TESTING:
     # Testlarda log shovqinini kamaytirish
     LOGGING["root"]["level"] = "CRITICAL"
+
+# --- Sentry (faqat SENTRY_DSN bo'lsa) ---
+SENTRY_DSN = env("SENTRY_DSN", default="")
+if SENTRY_DSN and not TESTING:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=env.float("SENTRY_TRACES_RATE", default=0.0),
+        send_default_pii=False,
+        environment="production" if not DEBUG else "development",
+    )
 
 # --- Production hardening (faqat DEBUG=False, test bo'lmaganda) ---
 if not DEBUG and not TESTING:

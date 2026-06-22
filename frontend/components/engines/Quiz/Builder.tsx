@@ -1,13 +1,78 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trash2 } from "lucide-react";
+import { ImagePlus, Trash2, X } from "lucide-react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { apiError } from "@/lib/api";
+import { uploadMedia } from "@/lib/content";
 import type { QuizData, QuizQuestion } from "@/types/engines";
 import type { BuilderProps } from "../types";
+
+function QuestionImage({
+  image,
+  onChange,
+}: {
+  image: string | null;
+  onChange: (url: string | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function pick(file: File) {
+    setUploading(true);
+    setError(null);
+    try {
+      onChange(await uploadMedia(file));
+    } catch (e) {
+      setError(apiError(e));
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  if (image) {
+    return (
+      <div className="flex items-center gap-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={image} alt="" className="h-16 w-16 rounded-lg object-cover" />
+        <Button variant="ghost" size="sm" onClick={() => onChange(null)}>
+          <X size={14} /> Rasmni olib tashlash
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) pick(f);
+        }}
+      />
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={uploading}
+        onClick={() => inputRef.current?.click()}
+      >
+        {uploading ? <Spinner size={14} /> : <ImagePlus size={14} />}
+        {uploading ? "Yuklanmoqda…" : "Rasm qo'shish"}
+      </Button>
+      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
 
 const emptyQuestion = (): QuizQuestion => ({
   text: "",
@@ -67,6 +132,10 @@ export function QuizBuilder({ value, onChange }: BuilderProps<QuizData>) {
               placeholder="Savol matni"
               value={q.text}
               onChange={(e) => update(qi, { text: e.target.value })}
+            />
+            <QuestionImage
+              image={q.image}
+              onChange={(url) => update(qi, { image: url })}
             />
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">

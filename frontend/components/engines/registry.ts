@@ -6,9 +6,11 @@ import { FillBlankEngine } from "./FillBlank";
 import { FlashcardEngine } from "./Flashcard";
 import { MatchingEngine } from "./Matching";
 import { MemoryEngine } from "./Memory";
+import { PollEngine } from "./Poll";
 import { QuizEngine } from "./Quiz";
 import { SortOrderEngine } from "./SortOrder";
 import { SpinWheelEngine } from "./SpinWheel";
+import { TrueFalseEngine } from "./TrueFalse";
 import { WordSearchEngine } from "./WordSearch";
 
 // Data tipi modul ichida aniq; registr darajasida `unknown` bilan saqlanadi.
@@ -26,6 +28,8 @@ const ENGINE_LIST = [
   SortOrderEngine,
   FillBlankEngine,
   WordSearchEngine,
+  TrueFalseEngine,
+  PollEngine,
 ] as unknown as AnyEngine[];
 
 export const ENGINES: Partial<Record<EngineSlug, AnyEngine>> =

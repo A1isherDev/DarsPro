@@ -1,23 +1,33 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BookOpen, Library as LibraryIcon } from "lucide-react";
+import {
+  BookOpen,
+  Copy,
+  Heart,
+  Library as LibraryIcon,
+  Search,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge, Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Label } from "@/components/ui/input";
+import { Input, Label } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import { Select } from "@/components/ui/select";
 import { CardSkeletonGrid } from "@/components/ui/skeleton";
 import { api, apiError } from "@/lib/api";
 import {
+  cloneItem,
+  fetchFavorites,
   fetchGrades,
   fetchItems,
   fetchPage,
   fetchSubjects,
   fetchTopics,
+  setFavorite,
 } from "@/lib/content";
 import { LoadMore } from "@/components/shared/LoadMore";
 import { useAuth } from "@/lib/store";
@@ -31,6 +41,7 @@ import type {
 
 export default function LibraryPage() {
   const router = useRouter();
+  const toast = useToast();
   const { user } = useAuth();
   const isFree = user?.effective_plan === "free";
 
@@ -45,6 +56,8 @@ export default function LibraryPage() {
   const [grade, setGrade] = useState("");
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
+  const [search, setSearch] = useState("");
+  const [favOnly, setFavOnly] = useState(false);
   const [mode, setMode] = useState<SessionMode>("class");
   const [error, setError] = useState<string | null>(null);
 
@@ -67,21 +80,56 @@ export default function LibraryPage() {
     }).then(setTopics);
   }, [grade, subject]);
 
-  // topic o'zgarsa — kontentni yuklash
+  // favorit / topic / qidiruv o'zgarsa — kontentni yuklash (qidiruv debounce bilan)
   useEffect(() => {
-    if (!topic) {
-      setItems([]);
+    const q = search.trim();
+    if (favOnly) {
+      setLoading(true);
+      fetchFavorites()
+        .then((p) => {
+          setItems(p.results);
+          setNext(p.next);
+        })
+        .catch((e) => setError(apiError(e)))
+        .finally(() => setLoading(false));
       return;
     }
-    setLoading(true);
-    fetchItems({ topic })
-      .then((p) => {
-        setItems(p.results);
-        setNext(p.next);
+    if (!topic && !q) {
+      setItems([]);
+      setNext(null);
+      return;
+    }
+    const t = setTimeout(() => {
+      setLoading(true);
+      fetchItems({
+        topic: topic || undefined,
+        search: q || undefined,
       })
-      .catch((e) => setError(apiError(e)))
-      .finally(() => setLoading(false));
-  }, [topic]);
+        .then((p) => {
+          setItems(p.results);
+          setNext(p.next);
+        })
+        .catch((e) => setError(apiError(e)))
+        .finally(() => setLoading(false));
+    }, q ? 300 : 0);
+    return () => clearTimeout(t);
+  }, [topic, search, favOnly]);
+
+  async function toggleFav(item: ContentItemListEntry) {
+    const next = !item.is_favorited;
+    setItems((list) =>
+      list.map((i) => (i.id === item.id ? { ...i, is_favorited: next } : i))
+    );
+    try {
+      await setFavorite(item.id, next);
+    } catch (e) {
+      // qaytarish
+      setItems((list) =>
+        list.map((i) => (i.id === item.id ? { ...i, is_favorited: !next } : i))
+      );
+      setError(apiError(e));
+    }
+  }
 
   async function loadMore() {
     if (!next) return;
@@ -94,6 +142,16 @@ export default function LibraryPage() {
       setError(apiError(e));
     } finally {
       setLoadingMore(false);
+    }
+  }
+
+  async function clone(item: ContentItemListEntry) {
+    try {
+      const copy = await cloneItem(item.id);
+      toast.success("Nusxa yaratildi — tahrirlashingiz mumkin.");
+      router.push(`/builder?edit=${copy.id}`);
+    } catch (e) {
+      toast.error(apiError(e));
     }
   }
 
@@ -115,6 +173,28 @@ export default function LibraryPage() {
       <div>
         <h1 className="font-display text-2xl font-bold">Kutubxona</h1>
         <p className="text-muted-foreground">Sinf va fan bo'yicha o'yinlarni toping.</p>
+      </div>
+
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="O'yin nomi bo'yicha qidirish…"
+            className="pl-9"
+            disabled={favOnly}
+          />
+        </div>
+        <Button
+          variant={favOnly ? "default" : "outline"}
+          onClick={() => setFavOnly((v) => !v)}
+        >
+          <Heart size={16} className={favOnly ? "fill-current" : ""} /> Sevimlilar
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -183,19 +263,23 @@ export default function LibraryPage() {
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      {!topic ? (
+      {loading ? (
+        <CardSkeletonGrid count={6} />
+      ) : !favOnly && !topic && !search.trim() ? (
         <EmptyState
           icon={LibraryIcon}
           title="O'yin tanlash"
-          description="Sinf va fanni tanlang, so'ng mavzuni belgilang — o'yinlar shu yerda paydo bo'ladi."
+          description="Qidiruv yozing yoki sinf/fan/mavzuni tanlang — o'yinlar shu yerda paydo bo'ladi."
         />
-      ) : loading ? (
-        <CardSkeletonGrid count={6} />
       ) : items.length === 0 ? (
         <EmptyState
-          icon={BookOpen}
-          title="Bu mavzuda o'yin yo'q"
-          description="Boshqa mavzuni tanlang yoki o'zingiz yangi o'yin yarating."
+          icon={favOnly ? Heart : BookOpen}
+          title={favOnly ? "Sevimlilar bo'sh" : "O'yin topilmadi"}
+          description={
+            favOnly
+              ? "Yoqqan o'yinlaringizni yurakcha bilan belgilang."
+              : "Boshqa so'rov/mavzuni sinab ko'ring yoki o'zingiz yarating."
+          }
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -209,8 +293,20 @@ export default function LibraryPage() {
                 <CardContent className="space-y-3 pt-5">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-display font-semibold">{item.title}</h3>
-                    <Badge variant="primary">{item.engine_slug}</Badge>
+                    <button
+                      onClick={() => toggleFav(item)}
+                      title="Sevimli"
+                      className="shrink-0 text-muted-foreground transition-colors hover:text-accent"
+                    >
+                      <Heart
+                        size={18}
+                        className={
+                          item.is_favorited ? "fill-accent text-accent" : ""
+                        }
+                      />
+                    </button>
                   </div>
+                  <Badge variant="primary">{item.engine_slug}</Badge>
                   <p className="text-xs text-muted-foreground">
                     {item.play_count} marta o'ynalgan
                   </p>
@@ -233,6 +329,14 @@ export default function LibraryPage() {
                         : mode === "pair"
                         ? "Juft o'yin"
                         : "Sinf rejimi"}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Nusxalab tahrirlash"
+                      onClick={() => clone(item)}
+                    >
+                      <Copy size={16} />
                     </Button>
                   </div>
                 </CardContent>

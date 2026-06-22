@@ -37,6 +37,7 @@ export async function fetchItems(params: {
   topic?: string;
   engine?: string;
   source?: string;
+  search?: string;
 }): Promise<Paginated<ContentItemListEntry>> {
   const { data } = await api.get<Paginated<ContentItemListEntry>>(
     "/content/items",
@@ -82,6 +83,36 @@ export async function updateItem(
 
 export async function deleteItem(id: string): Promise<void> {
   await api.delete(`/content/items/${id}`);
+}
+
+export async function setFavorite(id: string, on: boolean): Promise<void> {
+  if (on) await api.post(`/content/items/${id}/favorite`);
+  else await api.delete(`/content/items/${id}/favorite`);
+}
+
+export async function fetchFavorites(): Promise<
+  Paginated<ContentItemListEntry>
+> {
+  const { data } = await api.get<Paginated<ContentItemListEntry>>(
+    "/content/items/favorites"
+  );
+  return data;
+}
+
+export async function cloneItem(id: string): Promise<ContentItemDetail> {
+  const { data } = await api.post<ContentItemDetail>(
+    `/content/items/${id}/clone`
+  );
+  return data;
+}
+
+export async function uploadMedia(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  const { data } = await api.post<{ url: string }>("/content/upload", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data.url;
 }
 
 export async function recordSoloResult(payload: {

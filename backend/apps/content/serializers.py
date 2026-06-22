@@ -33,6 +33,7 @@ class ContentItemListSerializer(serializers.ModelSerializer):
     """Ro'yxat ko'rinishi — `data` siz (yengil)."""
 
     engine_slug = serializers.CharField(source="engine.slug", read_only=True)
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = ContentItem
@@ -45,8 +46,13 @@ class ContentItemListSerializer(serializers.ModelSerializer):
             "source",
             "status",
             "play_count",
+            "is_favorited",
             "created_at",
         ]
+
+    def get_is_favorited(self, obj):
+        ids = self.context.get("favorited_ids")
+        return bool(ids) and obj.id in ids
 
 
 class ContentItemDetailSerializer(serializers.ModelSerializer):

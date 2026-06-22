@@ -150,3 +150,74 @@ class SessionResultsView(_HostActionMixin, APIView):
                 "rankings": rankings,
             }
         )
+
+
+class SessionReportView(_HostActionMixin, APIView):
+    """GET /api/sessions/{id}/report — savol bo'yicha aniqlik tahlili."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        session = self.get_session(request, pk)
+        participants = list(session.participants.all())
+        questions = (session.content.data or {}).get("questions", [])
+
+        # Savol bo'yicha agregatsiya (GameParticipant.answers dan)
+        agg = {}
+        for p in participants:
+            for ans in p.answers or []:
+                idx = ans.get("question_index")
+                if idx is None:
+                    continue
+                row = agg.setdefault(idx, {"correct": 0, "total": 0, "time": 0})
+                row["total"] += 1
+                row["time"] += ans.get("time_taken", 0) or 0
+                if ans.get("correct"):
+                    row["correct"] += 1
+
+        question_stats = []
+        for idx in sorted(agg):
+            r = agg[idx]
+            text = questions[idx]["text"] if idx < len(questions) else f"Savol {idx + 1}"
+            question_stats.append(
+                {
+                    "index": idx,
+                    "text": text,
+                    "correct": r["correct"],
+                    "total": r["total"],
+                    "accuracy": round(r["correct"] / r["total"] * 100) if r["total"] else 0,
+                    "avg_time": round(r["time"] / r["total"], 1) if r["total"] else 0,
+                }
+            )
+
+        return Response(
+            {
+                "session_id": str(session.id),
+                "content_title": session.content.title,
+                "total_players": len(participants),
+                "question_stats": question_stats,
+            }
+        )
+
+
+class SessionResultsCsvView(_HostActionMixin, APIView):
+    """GET /api/sessions/{id}/results.csv — natijalarni CSV qilib yuklab olish."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        import csv
+
+        from django.http import HttpResponse
+
+        session = self.get_session(request, pk)
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = (
+            f'attachment; filename="darspro-{session.join_code}.csv"'
+        )
+        response.write("﻿")  # Excel UTF-8 BOM
+        writer = csv.writer(response)
+        writer.writerow(["O'rin", "Ism", "Jamoa", "Ball"])
+        for i, p in enumerate(session.participants.all(), start=1):
+            writer.writerow([i, p.display_name, p.team_number or "", p.score])
+        return response

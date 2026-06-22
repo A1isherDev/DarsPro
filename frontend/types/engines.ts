@@ -9,7 +9,9 @@ export type EngineSlug =
   | "crossword"
   | "sort_order"
   | "fill_blank"
-  | "word_search";
+  | "word_search"
+  | "true_false"
+  | "poll";
 
 export interface QuizQuestion {
   text: string;
@@ -41,6 +43,15 @@ export interface FlashcardData {
   cards: FlashcardCard[];
 }
 
+export interface TrueFalseData {
+  statements: { text: string; answer: boolean }[];
+}
+
+export interface PollData {
+  question: string;
+  options: string[];
+}
+
 // Engine slug -> data tipi xaritasi
 export interface EngineDataMap {
   quiz: QuizData;
@@ -52,6 +63,8 @@ export interface EngineDataMap {
   sort_order: { items: Array<{ text: string; order: number }>; title: string };
   fill_blank: { text: string; blanks: string[]; hints: string[] };
   word_search: { words: string[]; grid_size: number };
+  true_false: TrueFalseData;
+  poll: PollData;
 }
 
 // MVP'da to'liq qo'llab-quvvatlanadigan enginelar

@@ -32,6 +32,17 @@ class HealthTests(APITestCase):
         self.assertEqual(resp.data["checks"]["cache"], "ok")
 
 
+class ObservabilityTests(APITestCase):
+    def test_request_id_header(self):
+        resp = self.client.get("/api/health")
+        self.assertIn("X-Request-ID", resp)
+
+    def test_metrics_endpoint(self):
+        resp = self.client.get("/metrics")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn(b"python_info", resp.content)
+
+
 class ReconcilePlansTests(TestCase):
     def test_expired_subscription_demotes_user(self):
         user = User.objects.create_user("exp@test.uz", "StrongPass123")

@@ -70,6 +70,7 @@ export interface ContentItemListEntry {
   source: ContentSource;
   status: ContentStatus;
   play_count: number;
+  is_favorited?: boolean;
   created_at: string;
 }
 

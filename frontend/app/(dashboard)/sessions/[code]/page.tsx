@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Download, Printer } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,15 @@ interface Rank {
   team: number | null;
 }
 
+interface QuestionStat {
+  index: number;
+  text: string;
+  correct: number;
+  total: number;
+  accuracy: number;
+  avg_time: number;
+}
+
 export default function HostRoomPage({ params }: { params: { code: string } }) {
   const joinCode = params.code;
   const sockRef = useRef<SessionSocket | null>(null);
@@ -30,6 +40,33 @@ export default function HostRoomPage({ params }: { params: { code: string } }) {
   const [players, setPlayers] = useState<string[]>([]);
   const [leaderboard, setLeaderboard] = useState<Rank[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+  const [report, setReport] = useState<QuestionStat[] | null>(null);
+
+  // O'yin tugagach savol bo'yicha hisobotni yuklaymiz
+  useEffect(() => {
+    if (!ended || !session) return;
+    api
+      .get(`/sessions/${session.id}/report`)
+      .then((r) => setReport(r.data.question_stats))
+      .catch(() => {});
+  }, [ended, session]);
+
+  async function downloadCsv() {
+    if (!session) return;
+    try {
+      const r = await api.get(`/sessions/${session.id}/results.csv`, {
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(r.data as Blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `darspro-${session.join_code}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(apiError(e));
+    }
+  }
 
   useEffect(() => {
     api
@@ -194,7 +231,17 @@ export default function HostRoomPage({ params }: { params: { code: string } }) {
             Joriy savol: {currentIndex + 1}
           </span>
         )}
-        {ended && <span className="font-semibold">O'yin tugadi ✅</span>}
+        {ended && (
+          <>
+            <span className="flex items-center font-semibold">O'yin tugadi ✅</span>
+            <Button variant="outline" onClick={downloadCsv}>
+              <Download size={16} /> CSV yuklab olish
+            </Button>
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer size={16} /> Chop etish / PDF
+            </Button>
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -259,6 +306,41 @@ export default function HostRoomPage({ params }: { params: { code: string } }) {
           </CardContent>
         </Card>
       </div>
+
+      {ended && report && report.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Savol bo'yicha tahlil</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {report.map((q) => (
+              <div key={q.index} className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="truncate pr-2 font-medium">
+                    {q.index + 1}. {q.text}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-muted-foreground">
+                    {q.accuracy}% · {q.correct}/{q.total}
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={cn(
+                      "h-full rounded-full",
+                      q.accuracy >= 70
+                        ? "bg-success"
+                        : q.accuracy >= 40
+                        ? "bg-warning"
+                        : "bg-destructive"
+                    )}
+                    style={{ width: `${q.accuracy}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

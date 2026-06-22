@@ -6,6 +6,7 @@ from .views import (
     ContentItemViewSet,
     EngineListView,
     GradeListView,
+    MediaUploadView,
     SubjectListView,
     TopicListView,
 )
@@ -18,5 +19,6 @@ urlpatterns = [
     path("subjects", SubjectListView.as_view(), name="subjects"),
     path("topics", TopicListView.as_view(), name="topics"),
     path("engines", EngineListView.as_view(), name="engines"),
+    path("upload", MediaUploadView.as_view(), name="media-upload"),
     *router.urls,
 ]

@@ -24,6 +24,8 @@ const VALID: Record<EngineSlug, unknown> = {
   },
   fill_blank: { text: "Poytaxt ___ shahri.", blanks: ["Toshkent"], hints: [] },
   word_search: { words: ["ATOM", "ION"], grid_size: 10 },
+  true_false: { statements: [{ text: "Yer dumaloq", answer: true }] },
+  poll: { question: "Sevimli fan?", options: ["Matematika", "Biologiya"] },
 };
 
 const INVALID: Record<EngineSlug, unknown> = {
@@ -36,13 +38,15 @@ const INVALID: Record<EngineSlug, unknown> = {
   sort_order: { title: "", items: [{ text: "", order: 1 }] },
   fill_blank: { text: "bo'sh joy yo'q", blanks: [], hints: [] },
   word_search: { words: ["JUDAUZUNSOZ"], grid_size: 5 },
+  true_false: { statements: [{ text: "", answer: true }] },
+  poll: { question: "Savol", options: ["bitta"] },
 };
 
 const SLUGS = Object.keys(VALID) as EngineSlug[];
 
 describe("engine registri", () => {
-  it("9 ta engine ro'yxatga olingan", () => {
-    expect(BUILDABLE_ENGINES.length).toBe(9);
+  it("11 ta engine ro'yxatga olingan", () => {
+    expect(BUILDABLE_ENGINES.length).toBe(11);
   });
 
   it.each(SLUGS)("'%s' engine mavjud va slug mos", (slug) => {

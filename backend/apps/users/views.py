@@ -130,6 +130,102 @@ class MeStatsView(APIView):
         )
 
 
+class MeAchievementsView(APIView):
+    """GET /api/users/me/achievements — yutuqlar (mavjud ma'lumotdan hisoblanadi)."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from apps.content.models import ContentItem
+        from apps.sessions.models import GameParticipant, GameSession, UserGame
+
+        user = request.user
+        games = UserGame.objects.filter(user=user).count()
+        created = ContentItem.objects.filter(created_by=user).count()
+        hosted = GameSession.objects.filter(host_user=user).count()
+        reached = GameParticipant.objects.filter(session__host_user=user).count()
+        streak = self._streak(user)
+
+        defs = [
+            ("first_game", "Birinchi qadam", "🎯", games, 1),
+            ("player", "O'yinboz", "🎮", games, 10),
+            ("creator", "Ijodkor", "✍️", created, 1),
+            ("host", "Murabbiy", "📡", hosted, 1),
+            ("popular", "Mashhur", "🌟", reached, 50),
+            ("streak", "Izchillik (3 kun)", "🔥", streak, 3),
+        ]
+        badges = [
+            {
+                "key": k,
+                "label": label,
+                "emoji": emoji,
+                "current": cur,
+                "target": tgt,
+                "earned": cur >= tgt,
+            }
+            for (k, label, emoji, cur, tgt) in defs
+        ]
+        return Response({"streak": streak, "badges": badges})
+
+    @staticmethod
+    def _streak(user):
+        from apps.sessions.models import UserGame
+
+        dates = sorted(
+            {
+                d.date()
+                for d in UserGame.objects.filter(user=user).values_list(
+                    "played_at", flat=True
+                )
+            }
+        )
+        if not dates:
+            return 0
+        from datetime import timedelta
+
+        best = run = 1
+        for i in range(1, len(dates)):
+            if dates[i] - dates[i - 1] == timedelta(days=1):
+                run += 1
+                best = max(best, run)
+            else:
+                run = 1
+        return best
+
+
+class MeTeachingStatsView(APIView):
+    """GET /api/users/me/teaching-stats — o'qituvchining host statistikasi."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.db.models import Avg, Count
+
+        from apps.sessions.models import GameParticipant, GameSession, SessionStatus
+
+        user = request.user
+        sessions = GameSession.objects.filter(host_user=user)
+        participants = GameParticipant.objects.filter(session__host_user=user)
+        top = list(
+            sessions.values("content__title")
+            .annotate(count=Count("id"))
+            .order_by("-count")[:5]
+        )
+        return Response(
+            {
+                "total_sessions": sessions.count(),
+                "ended_sessions": sessions.filter(status=SessionStatus.ENDED).count(),
+                "total_participants": participants.count(),
+                "avg_participant_score": round(
+                    participants.aggregate(a=Avg("score"))["a"] or 0, 1
+                ),
+                "top_content": [
+                    {"title": t["content__title"], "sessions": t["count"]} for t in top
+                ],
+            }
+        )
+
+
 class MeHistoryView(generics.ListAPIView):
     """GET /api/users/me/history — o'yin tarixi."""
 

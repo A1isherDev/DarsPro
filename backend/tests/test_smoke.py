@@ -141,6 +141,82 @@ class ContentTests(BaseSetup):
             self.client.delete(f"/api/content/items/{item_id}").status_code, 204
         )
 
+    def test_search_and_clone(self):
+        from apps.content.models import ContentItem, ContentStatus
+
+        # Published item (qidiruv uchun)
+        pub = ContentItem.objects.create(
+            topic=self.topic, engine=self.engine, title="Fotosintez viktorina",
+            status=ContentStatus.PUBLISHED,
+            data={"questions": [{"text": "q", "options": ["a", "b"], "answer": 0}]},
+        )
+        # Qidiruv (public)
+        found = self.client.get("/api/content/items?search=fotosintez")
+        self.assertEqual(found.data["count"], 1)
+        self.assertEqual(self.client.get("/api/content/items?search=yoqxxx").data["count"], 0)
+
+        # Klon (pro user)
+        token = self.register("clone@test.uz")
+        pro = User.objects.get(email="clone@test.uz")
+        Subscription.objects.create(
+            user=pro, plan=Plan.PRO, expires_at=timezone.now() + timedelta(days=30)
+        )
+        self.auth(token)
+        resp = self.client.post(f"/api/content/items/{pub.id}/clone")
+        self.assertEqual(resp.status_code, 201, resp.content)
+        self.assertEqual(resp.data["status"], "pending")
+        self.assertEqual(str(resp.data["created_by"]), str(pro.id))
+        self.assertIn("nusxa", resp.data["title"])
+        # Klon o'z kontentida ko'rinadi
+        mine = self.client.get("/api/content/items?mine=true")
+        self.assertEqual(mine.data["count"], 1)
+
+    def test_favorites(self):
+        from apps.content.models import ContentItem, ContentStatus
+
+        pub = ContentItem.objects.create(
+            topic=self.topic, engine=self.engine, title="Sevimli o'yin",
+            status=ContentStatus.PUBLISHED,
+            data={"questions": [{"text": "q", "options": ["a", "b"], "answer": 0}]},
+        )
+        token = self.register("fav@test.uz")
+        self.auth(token)
+        # Sevimliga qo'shish
+        self.assertEqual(
+            self.client.post(f"/api/content/items/{pub.id}/favorite").status_code, 201
+        )
+        favs = self.client.get("/api/content/items/favorites")
+        self.assertEqual(favs.data["count"], 1)
+        self.assertTrue(favs.data["results"][0]["is_favorited"])
+        # Kutubxona ro'yxatida is_favorited=true
+        lib = self.client.get(f"/api/content/items?topic={self.topic.id}")
+        self.assertTrue(lib.data["results"][0]["is_favorited"])
+        # Olib tashlash
+        self.assertEqual(
+            self.client.delete(f"/api/content/items/{pub.id}/favorite").status_code, 204
+        )
+        self.assertEqual(self.client.get("/api/content/items/favorites").data["count"], 0)
+
+    def test_media_upload(self):
+        import io
+
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        token = self.register("upload@test.uz")
+        self.auth(token)
+        # To'g'ri rasm (haqiqiy PNG)
+        buf = io.BytesIO()
+        Image.new("RGB", (8, 8), "blue").save(buf, format="PNG")
+        img = SimpleUploadedFile("q.png", buf.getvalue(), content_type="image/png")
+        ok = self.client.post("/api/content/upload", {"file": img}, format="multipart")
+        self.assertEqual(ok.status_code, 201, ok.content)
+        self.assertIn("/media/uploads/", ok.data["url"])
+        # Rasm bo'lmagan fayl rad etiladi
+        bad = SimpleUploadedFile("x.txt", b"hello", content_type="text/plain")
+        rej = self.client.post("/api/content/upload", {"file": bad}, format="multipart")
+        self.assertEqual(rej.status_code, 400)
+
     def test_invalid_quiz_data_rejected(self):
         pro_token = self.register("pro2@test.uz")
         pro = User.objects.get(email="pro2@test.uz")
@@ -247,6 +323,76 @@ class SessionTests(BaseSetup):
         )
         self.assertEqual(ok.status_code, 201, ok.content)
         self.assertEqual(ok.data["mode"], "team")
+
+    def test_achievements(self):
+        from apps.sessions.models import UserGame
+
+        token = self.register("ach@test.uz")
+        user = User.objects.get(email="ach@test.uz")
+        self.auth(token)
+        item = self._published_item()
+        UserGame.objects.create(user=user, content=item, score=100, duration_sec=10)
+
+        resp = self.client.get("/api/users/me/achievements")
+        self.assertEqual(resp.status_code, 200)
+        first = next(b for b in resp.data["badges"] if b["key"] == "first_game")
+        self.assertTrue(first["earned"])
+        player = next(b for b in resp.data["badges"] if b["key"] == "player")
+        self.assertFalse(player["earned"])  # 10 ta kerak
+        self.assertEqual(resp.data["streak"], 1)
+
+    def test_report_csv_and_teaching_stats(self):
+        from apps.sessions.models import GameParticipant
+
+        token = self.register("report@test.uz")
+        self.auth(token)
+        item = self._published_item()
+        # 2 savolli quiz kontent
+        item.data = {
+            "questions": [
+                {"text": "Q1", "options": ["a", "b"], "answer": 0, "time_limit": 20},
+                {"text": "Q2", "options": ["a", "b"], "answer": 1, "time_limit": 20},
+            ]
+        }
+        item.save()
+        resp = self.client.post(
+            "/api/sessions/", {"content": str(item.id), "mode": "class"}, format="json"
+        )
+        sid = resp.data["id"]
+        join_code = resp.data["join_code"]
+
+        # 2 o'quvchi javob beradi (answers to'g'ridan-to'g'ri)
+        from apps.sessions.models import GameSession
+
+        session = GameSession.objects.get(id=sid)
+        GameParticipant.objects.create(
+            session=session, display_name="Ali", score=1000,
+            answers=[{"question_index": 0, "correct": True, "time_taken": 5}],
+        )
+        GameParticipant.objects.create(
+            session=session, display_name="Vali", score=0,
+            answers=[{"question_index": 0, "correct": False, "time_taken": 10}],
+        )
+
+        # Report — 1-savol 50% aniqlik
+        report = self.client.get(f"/api/sessions/{sid}/report")
+        self.assertEqual(report.status_code, 200, report.content)
+        q0 = next(q for q in report.data["question_stats"] if q["index"] == 0)
+        self.assertEqual(q0["accuracy"], 50)
+        self.assertEqual(q0["total"], 2)
+
+        # CSV eksport
+        csv_resp = self.client.get(f"/api/sessions/{sid}/results.csv")
+        self.assertEqual(csv_resp.status_code, 200)
+        self.assertIn("text/csv", csv_resp["Content-Type"])
+        body = csv_resp.content.decode("utf-8")
+        self.assertIn("Ali", body)
+
+        # Teaching stats
+        ts = self.client.get("/api/users/me/teaching-stats")
+        self.assertEqual(ts.status_code, 200)
+        self.assertEqual(ts.data["total_sessions"], 1)
+        self.assertEqual(ts.data["total_participants"], 2)
 
     def test_max_players_plan_limit(self):
         token = self.register("host2@test.uz")

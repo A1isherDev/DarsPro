@@ -63,6 +63,11 @@ python manage.py cleanup_sessions  # --dry-run --stale-hours --prune-days
 **Caching:** public katalog (`/grades`, `/subjects`, `/engines`) Redis'da 5 daqiqa
 keshlanadi (`cache_page`). **Logging:** `LOG_LEVEL` env (default INFO), console handler.
 
+**Xavfsizlik:** WS Origin validatsiya (`ALLOWED_HOSTS`), throttling, payload/upload
+limitlari, Pillow rasm verify. **Prod media:** `MEDIA_*` lokal storage faqat
+`DEBUG`'da Django orqali xizmat qilinadi — prodda nginx yoki S3 (django-storages,
+`DEFAULT_FILE_STORAGE` env) orqali bering.
+
 ## Struktura
 
 | Yo'l | Mazmun |

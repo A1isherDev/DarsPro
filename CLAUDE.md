@@ -224,6 +224,7 @@ GET  /grades                    — 1–11 ro'yxat
 GET  /subjects                  — fanlar
 GET  /topics                    — ?grade=&subject=
 GET  /engines                   — engine turlari
+POST /upload            [auth]  — rasm yuklash → {url} (builder uchun)
 GET  /items                     — ?topic=&engine=&source= (faqat published)
 GET  /items?mine=true   [auth]  — o'z kontenti (barcha status: draft/pending/...)
 GET  /items/{id}        [auth]  — to'liq + data field
@@ -250,6 +251,8 @@ POST /{join_code}/join          — o'quvchi kiradi (ism kiritadi)
 PATCH /{id}/start       [auth]  — o'yinni boshlash
 PATCH /{id}/end         [auth]  — o'yinni tugatish
 GET  /{id}/results      [auth]  — yakuniy natijalar
+GET  /{id}/report       [auth]  — savol bo'yicha aniqlik tahlili (host)
+GET  /{id}/results.csv  [auth]  — natijalarni CSV yuklab olish (host)
 ```
 
 ### WebSocket
@@ -481,6 +484,19 @@ Faqat shular birinchi versiyada:
 - ✅ Operatsion: health endpointlar (`/api/health`, `/ready`), **Celery + Beat**
   (reconcile_plans har soat, cleanup_sessions har 30 daq; management command fallback),
   katalog caching, LOGGING. Docker: worker + beat servislari
+- ✅ API hujjat: Swagger UI `/api/docs` (drf-spectacular), root README
+- ✅ Analitika: sessiya report (savol aniqligi), CSV eksport, teaching-stats; dashboard kartasi
+- ✅ Media upload: rasmli quiz savollari (`/api/content/upload`, lokal/S3 storage)
+- ✅ O'qituvchi qulayliklari: kutubxona qidiruvi (`?search=`), kontent klon
+  (`items/{id}/clone`), sevimlilar (`items/{id}/favorite`, `items/favorites`),
+  PDF hisobot (print)
+- ✅ 11 engine (true_false, poll qo'shildi); gamifikatsiya: yutuqlar
+  (`/users/me/achievements`) + dashboard; ovoz effektlari (Web Audio)
+- ✅ Observability: request-id middleware, JSON logging (`LOG_FORMAT=json`),
+  Sentry (`SENTRY_DSN` bo'lsa), Prometheus `/metrics`; E2E (Playwright + axe a11y)
+- ✅ Hardening: WS Origin validatsiya (CSWSH), WS max_players + display_name cap +
+  rate-limit, payload limitlari (data ≤100KB, savol/variant caps), kuchli parol
+  validatorlari, upload Pillow verify (soxta rasm rad). Test: `test_security.py`
 - ✅ UI qayta-ishlash: o'yinbop/rang-barang dizayn, Framer Motion, Baloo 2 +
   Nunito shriftlar, kengaytirilgan token palitra (success/warning/info/answer),
   primitivlar (Skeleton/EmptyState/Toast/Dialog/Progress), Kahoot-uslub Quiz,
