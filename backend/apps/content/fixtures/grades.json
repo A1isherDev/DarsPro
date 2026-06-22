@@ -1,0 +1,13 @@
+[
+  {"model": "content.grade", "pk": 1, "fields": {"number": 1, "label": "1-sinf"}},
+  {"model": "content.grade", "pk": 2, "fields": {"number": 2, "label": "2-sinf"}},
+  {"model": "content.grade", "pk": 3, "fields": {"number": 3, "label": "3-sinf"}},
+  {"model": "content.grade", "pk": 4, "fields": {"number": 4, "label": "4-sinf"}},
+  {"model": "content.grade", "pk": 5, "fields": {"number": 5, "label": "5-sinf"}},
+  {"model": "content.grade", "pk": 6, "fields": {"number": 6, "label": "6-sinf"}},
+  {"model": "content.grade", "pk": 7, "fields": {"number": 7, "label": "7-sinf"}},
+  {"model": "content.grade", "pk": 8, "fields": {"number": 8, "label": "8-sinf"}},
+  {"model": "content.grade", "pk": 9, "fields": {"number": 9, "label": "9-sinf"}},
+  {"model": "content.grade", "pk": 10, "fields": {"number": 10, "label": "10-sinf"}},
+  {"model": "content.grade", "pk": 11, "fields": {"number": 11, "label": "11-sinf"}}
+]

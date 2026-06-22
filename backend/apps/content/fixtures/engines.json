@@ -1,0 +1,11 @@
+[
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000001", "fields": {"name": "Quiz", "slug": "quiz", "default_config": {"time_limit": 30, "show_leaderboard": true}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000002", "fields": {"name": "Matching", "slug": "matching", "default_config": {}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000003", "fields": {"name": "Flashcard", "slug": "flashcard", "default_config": {}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000004", "fields": {"name": "Spin Wheel", "slug": "spin_wheel", "default_config": {}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000005", "fields": {"name": "Memory", "slug": "memory", "default_config": {}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000006", "fields": {"name": "Crossword", "slug": "crossword", "default_config": {}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000007", "fields": {"name": "Sort Order", "slug": "sort_order", "default_config": {}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000008", "fields": {"name": "Fill Blank", "slug": "fill_blank", "default_config": {}}},
+  {"model": "content.gameengine", "pk": "b2000000-0000-4000-8000-000000000009", "fields": {"name": "Word Search", "slug": "word_search", "default_config": {}}}
+]

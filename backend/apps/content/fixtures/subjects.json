@@ -1,0 +1,10 @@
+[
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000001", "fields": {"name": "Matematika", "slug": "matematika", "icon": "🔢", "is_active": true}},
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000002", "fields": {"name": "Ona tili", "slug": "ona-tili", "icon": "📖", "is_active": true}},
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000003", "fields": {"name": "Ingliz tili", "slug": "ingliz-tili", "icon": "🔤", "is_active": true}},
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000004", "fields": {"name": "Biologiya", "slug": "biologiya", "icon": "🌿", "is_active": true}},
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000005", "fields": {"name": "Kimyo", "slug": "kimyo", "icon": "⚗️", "is_active": true}},
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000006", "fields": {"name": "Fizika", "slug": "fizika", "icon": "🧲", "is_active": true}},
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000007", "fields": {"name": "Geografiya", "slug": "geografiya", "icon": "🌍", "is_active": true}},
+  {"model": "content.subject", "pk": "a1000000-0000-4000-8000-000000000008", "fields": {"name": "Tarix", "slug": "tarix", "icon": "🏛️", "is_active": true}}
+]

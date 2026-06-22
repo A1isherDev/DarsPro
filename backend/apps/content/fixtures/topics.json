@@ -1,0 +1,8 @@
+[
+  {"model": "content.topic", "pk": "c3000000-0000-4000-8000-000000000001", "fields": {"subject": "a1000000-0000-4000-8000-000000000004", "grade": 7, "title": "Hujayra", "slug": "hujayra", "order": 1, "is_active": true}},
+  {"model": "content.topic", "pk": "c3000000-0000-4000-8000-000000000002", "fields": {"subject": "a1000000-0000-4000-8000-000000000004", "grade": 7, "title": "Fotosintez", "slug": "fotosintez", "order": 2, "is_active": true}},
+  {"model": "content.topic", "pk": "c3000000-0000-4000-8000-000000000003", "fields": {"subject": "a1000000-0000-4000-8000-000000000004", "grade": 6, "title": "Tirik organizmlar", "slug": "tirik-organizmlar", "order": 1, "is_active": true}},
+  {"model": "content.topic", "pk": "c3000000-0000-4000-8000-000000000004", "fields": {"subject": "a1000000-0000-4000-8000-000000000001", "grade": 5, "title": "Oddiy kasrlar", "slug": "oddiy-kasrlar", "order": 1, "is_active": true}},
+  {"model": "content.topic", "pk": "c3000000-0000-4000-8000-000000000005", "fields": {"subject": "a1000000-0000-4000-8000-000000000001", "grade": 7, "title": "Geometriya asoslari", "slug": "geometriya-asoslari", "order": 2, "is_active": true}},
+  {"model": "content.topic", "pk": "c3000000-0000-4000-8000-000000000006", "fields": {"subject": "a1000000-0000-4000-8000-000000000002", "grade": 1, "title": "Alifbo", "slug": "alifbo", "order": 1, "is_active": true}}
+]

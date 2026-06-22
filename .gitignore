@@ -1,0 +1,29 @@
+# Python / backend
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.sqlite3
+.pytest_cache/
+staticfiles/
+media/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# Node / frontend
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Generated knowledge graph (machine-specific paths)
+graphify-out/
+
+# OS / editor
+.DS_Store
+*.log

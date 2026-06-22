@@ -1,0 +1,212 @@
+[
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000001",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000001",
+      "engine": "b2000000-0000-4000-8000-000000000001",
+      "created_by": null,
+      "title": "Hujayra — savol-javob",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-10T09:00:00Z",
+      "data": {
+        "questions": [
+          {"text": "Hujayraning eng tashqi qismi qaysi?", "image": null, "options": ["Yadro", "Sitoplazma", "Membrana", "Mitoxondriya"], "answer": 2, "time_limit": 20},
+          {"text": "Genetik ma'lumot qayerda saqlanadi?", "image": null, "options": ["Yadro", "Ribosoma", "Vakuol", "Membrana"], "answer": 0, "time_limit": 20},
+          {"text": "Energiya ishlab chiqaradigan organoid?", "image": null, "options": ["Yadro", "Mitoxondriya", "Vakuol", "Membrana"], "answer": 1, "time_limit": 25}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000002",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000001",
+      "engine": "b2000000-0000-4000-8000-000000000003",
+      "created_by": null,
+      "title": "Hujayra atamalari (kartochka)",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-10T09:05:00Z",
+      "data": {
+        "cards": [
+          {"front": "Membrana", "back": "Hujayrani o'rab turuvchi tashqi qatlam"},
+          {"front": "Yadro", "back": "Genetik ma'lumotni saqlovchi markaz"},
+          {"front": "Sitoplazma", "back": "Hujayra ichini to'ldiruvchi suyuq muhit"},
+          {"front": "Mitoxondriya", "back": "Energiya ishlab chiqaruvchi organoid"}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000003",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000002",
+      "engine": "b2000000-0000-4000-8000-000000000002",
+      "created_by": null,
+      "title": "Fotosintez juftliklari",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-11T10:00:00Z",
+      "data": {
+        "pairs": [
+          {"term": "Xlorofill", "definition": "Yashil pigment, yorug'likni yutadi"},
+          {"term": "Karbonat angidrid", "definition": "O'simlik yutadigan gaz"},
+          {"term": "Kislorod", "definition": "Fotosintez natijasida ajraladigan gaz"},
+          {"term": "Glyukoza", "definition": "Hosil bo'ladigan oziq modda"}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000004",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000004",
+      "engine": "b2000000-0000-4000-8000-000000000001",
+      "created_by": null,
+      "title": "Oddiy kasrlar testi",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-12T08:30:00Z",
+      "data": {
+        "questions": [
+          {"text": "1/2 + 1/2 nechaga teng?", "image": null, "options": ["1", "1/4", "2/4", "0"], "answer": 0, "time_limit": 20},
+          {"text": "3/4 kasrning surat (numerator) qismi qaysi?", "image": null, "options": ["4", "3", "7", "1"], "answer": 1, "time_limit": 20},
+          {"text": "1/4 dan kattasi qaysi?", "image": null, "options": ["1/8", "1/2", "1/10", "0"], "answer": 1, "time_limit": 25}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000005",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000006",
+      "engine": "b2000000-0000-4000-8000-000000000003",
+      "created_by": null,
+      "title": "Alifbo harflari",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-13T11:00:00Z",
+      "data": {
+        "cards": [
+          {"front": "A", "back": "Olma"},
+          {"front": "B", "back": "Baliq"},
+          {"front": "D", "back": "Daraxt"},
+          {"front": "K", "back": "Kitob"}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000006",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000005",
+      "engine": "b2000000-0000-4000-8000-000000000001",
+      "created_by": null,
+      "title": "Geometriya boshlanishi",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-14T12:00:00Z",
+      "data": {
+        "questions": [
+          {"text": "Uchburchakning nechta tomoni bor?", "image": null, "options": ["2", "3", "4", "5"], "answer": 1, "time_limit": 15},
+          {"text": "To'g'ri burchak necha gradus?", "image": null, "options": ["45", "60", "90", "180"], "answer": 2, "time_limit": 20}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000007",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000003",
+      "engine": "b2000000-0000-4000-8000-000000000005",
+      "created_by": null,
+      "title": "Hayvonlar va nomlari (xotira)",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-15T09:00:00Z",
+      "data": {
+        "pairs": [
+          {"a": "🐶", "b": "It"},
+          {"a": "🐱", "b": "Mushuk"},
+          {"a": "🐮", "b": "Sigir"},
+          {"a": "🐴", "b": "Ot"}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000008",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000002",
+      "engine": "b2000000-0000-4000-8000-000000000007",
+      "created_by": null,
+      "title": "O'simlik o'sish bosqichlari",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-15T10:00:00Z",
+      "data": {
+        "title": "To'g'ri tartibni toping",
+        "items": [
+          {"text": "Urug' ekish", "order": 1},
+          {"text": "Suv berish", "order": 2},
+          {"text": "Unib chiqish", "order": 3},
+          {"text": "Gullash", "order": 4}
+        ]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-000000000009",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000003",
+      "engine": "b2000000-0000-4000-8000-000000000008",
+      "created_by": null,
+      "title": "Biologiya — bo'sh joyni to'ldiring",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-15T11:00:00Z",
+      "data": {
+        "text": "Hujayraning genetik markazi ___ deb ataladi, energiya esa ___ da ishlab chiqariladi.",
+        "blanks": ["yadro", "mitoxondriya"],
+        "hints": ["organoidlar"]
+      }
+    }
+  },
+  {
+    "model": "content.contentitem",
+    "pk": "d4000000-0000-4000-8000-00000000000a",
+    "fields": {
+      "topic": "c3000000-0000-4000-8000-000000000001",
+      "engine": "b2000000-0000-4000-8000-000000000009",
+      "created_by": null,
+      "title": "Hujayra atamalari — so'z izlash",
+      "source": "staff",
+      "status": "published",
+      "play_count": 0,
+      "created_at": "2026-01-15T12:00:00Z",
+      "data": {
+        "words": ["YADRO", "MEMBRANA", "ATOM", "ION"],
+        "grid_size": 10
+      }
+    }
+  }
+]

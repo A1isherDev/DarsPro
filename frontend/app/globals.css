@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 250 40% 99%;
+  --foreground: 240 30% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 30% 14%;
+
+  --primary: 256 78% 60%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 330 85% 60%;
+  --accent-foreground: 0 0% 100%;
+
+  --muted: 250 30% 95%;
+  --muted-foreground: 240 12% 46%;
+  --border: 248 25% 90%;
+
+  --success: 152 62% 42%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 30 60% 16%;
+  --info: 206 90% 54%;
+  --info-foreground: 0 0% 100%;
+  --destructive: 0 72% 55%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Quiz / o'yin javob ranglari (Kahoot uslubida) */
+  --answer-1: 358 75% 59%; /* qizil */
+  --answer-2: 211 80% 53%; /* ko'k */
+  --answer-3: 42 96% 53%;  /* sariq */
+  --answer-4: 152 60% 45%; /* yashil */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 245 32% 10%;
+    --foreground: 250 30% 96%;
+    --card: 245 28% 14%;
+    --card-foreground: 250 30% 96%;
+
+    --primary: 256 82% 70%;
+    --primary-foreground: 245 40% 10%;
+    --accent: 330 85% 66%;
+    --accent-foreground: 245 40% 10%;
+
+    --muted: 245 22% 20%;
+    --muted-foreground: 245 14% 66%;
+    --border: 245 20% 26%;
+
+    --success: 152 55% 50%;
+    --success-foreground: 245 40% 10%;
+    --warning: 38 90% 58%;
+    --warning-foreground: 30 60% 12%;
+    --info: 206 85% 62%;
+    --info-foreground: 245 40% 10%;
+    --destructive: 0 65% 58%;
+    --destructive-foreground: 0 0% 100%;
+  }
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+}
+
+/* Yumshoq, rang-barang gradient fon (landing / auth / play) */
+.bg-app-gradient {
+  background:
+    radial-gradient(60% 50% at 15% 0%, hsl(var(--primary) / 0.18), transparent 60%),
+    radial-gradient(55% 45% at 90% 10%, hsl(var(--accent) / 0.16), transparent 60%),
+    radial-gradient(50% 60% at 50% 100%, hsl(var(--info) / 0.12), transparent 60%),
+    hsl(var(--background));
+}
