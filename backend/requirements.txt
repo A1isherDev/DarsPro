@@ -13,3 +13,10 @@ drf-spectacular==0.28.0
 sentry-sdk==2.20.0
 django-prometheus==2.3.1
 Pillow==11.1.0
+# Prod media storage (USE_S3=True bo'lganda; aks holda import qilinmaydi)
+django-storages==1.14.4
+boto3==1.35.99
+# Auth: Google id_token tekshirish (Phase 2)
+google-auth==2.38.0
+# Tashqi REST chaqiruvlari (Eskiz SMS) — Phase 2
+requests==2.32.3

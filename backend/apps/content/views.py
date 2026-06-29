@@ -74,7 +74,11 @@ class MediaUploadView(APIView):
 
         f.seek(0)  # verify() faylni o'qib chiqdi — qayta tiklaymiz
         name = default_storage.save(f"uploads/{uuid4().hex}{ext}", f)
-        url = request.build_absolute_uri(settings.MEDIA_URL + name)
+        # Lokal storage nisbiy yo'l qaytaradi → absolyut URL quramiz.
+        # S3 storage to'liq (absolyut) URL qaytaradi → o'zini ishlatamiz.
+        url = default_storage.url(name)
+        if url.startswith("/"):
+            url = request.build_absolute_uri(url)
         return Response({"url": url}, status=status.HTTP_201_CREATED)
 
 

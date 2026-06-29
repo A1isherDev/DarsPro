@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
+  CreditCard,
   FolderOpen,
   LayoutDashboard,
   LogOut,
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/builder", label: "Yaratish", icon: Plus },
   { href: "/my-content", label: "Mening kontentim", icon: FolderOpen },
   { href: "/sessions", label: "Sessiyalar", icon: Radio },
+  { href: "/pricing", label: "Tariflar", icon: CreditCard },
 ];
 
 export default function DashboardLayout({

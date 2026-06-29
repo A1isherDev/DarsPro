@@ -27,3 +27,5 @@ graphify-out/
 # OS / editor
 .DS_Store
 *.log
+.claude/launch.json
+frontend/.claude/

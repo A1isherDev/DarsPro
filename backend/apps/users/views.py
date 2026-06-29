@@ -244,3 +244,14 @@ class MeHistoryView(generics.ListAPIView):
             .select_related("content")
             .order_by("-played_at")
         )
+
+
+class PlansView(APIView):
+    """GET /api/users/plans — tariflar ro'yxati (public, pricing sahifasi uchun)."""
+
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        from .plans import pricing_list
+
+        return Response({"plans": pricing_list()})

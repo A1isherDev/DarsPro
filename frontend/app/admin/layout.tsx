@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { ArrowLeft, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, ShieldCheck, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/store";
 
 const NAV = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin", label: "Review navbati", icon: ShieldCheck },
   { href: "/admin/users", label: "Foydalanuvchilar", icon: Users },
 ];

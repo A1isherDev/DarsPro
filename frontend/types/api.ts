@@ -141,5 +141,59 @@ export interface Paginated<T> {
   results: T[];
 }
 
+// — Tariflar (pricing) —
+export interface PlanPricing {
+  slug: Plan;
+  label: string;
+  price: number;
+  highlight: boolean;
+  tagline: string;
+  limits: {
+    library: string;
+    monthly_create: number | null;
+    class_players: number;
+    team_mode: boolean;
+    multi_teacher: number;
+    ads: boolean;
+  };
+  features: string[];
+}
+
+// — Admin dashboard statistikasi (GET /api/admin/stats) —
+export interface AdminStats {
+  users: {
+    total: number;
+    by_plan: Record<string, number>;
+    staff: number;
+    new_today: number;
+    new_week: number;
+    new_month: number;
+  };
+  subscriptions: {
+    active: number;
+    by_plan: Record<string, number>;
+    expiring_week: number;
+    mrr: number;
+    pricing: Record<string, number>;
+  };
+  content: {
+    total: number;
+    by_status: Record<string, number>;
+    by_engine: Record<string, number>;
+    pending: number;
+    total_plays: number;
+    top_played: { id: string; title: string; play_count: number }[];
+  };
+  sessions: {
+    total: number;
+    by_mode: Record<string, number>;
+    by_status: Record<string, number>;
+    week: number;
+    participants: number;
+    solo_games: number;
+  };
+  generated_at: string;
+}
+
 // types/engines.ts dan
 import type { EngineSlug } from "./engines";

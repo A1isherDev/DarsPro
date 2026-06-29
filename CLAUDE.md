@@ -212,6 +212,7 @@ POST /logout            [auth]
 
 ### Foydalanuvchi `/api/users/`
 ```
+GET  /plans                     — tariflar ro'yxati (public, pricing sahifasi)
 GET  /me                [auth]  — profil + tarif
 PATCH /me               [auth]  — profil yangilash
 GET  /me/stats          [auth]  — statistika
@@ -235,6 +236,7 @@ DELETE /items/{id}      [auth]  — faqat o'z kontenti
 
 ### Admin `/api/admin/`
 ```
+GET  /stats             [admin] — dashboard ko'rsatkichlari (users, MRR, content, sessions)
 GET  /items/pending     [admin] — review navbati
 PATCH /items/{id}/approve [admin]
 PATCH /items/{id}/reject  [admin]
@@ -501,6 +503,15 @@ Faqat shular birinchi versiyada:
   Nunito shriftlar, kengaytirilgan token palitra (success/warning/info/answer),
   primitivlar (Skeleton/EmptyState/Toast/Dialog/Progress), Kahoot-uslub Quiz,
   3D flip Flashcard, celebrate/shake, medalli reyting
+- ✅ Tariflar: public `GET /api/users/plans` (`apps/users/plans.py` — yagona
+  narx manbai) + `/pricing` sahifasi (4 tarif kartasi, faqat ma'lumot — to'lov
+  manual). Landing + dashboard nav'da havola
+- ✅ Admin dashboard: `GET /api/admin/stats` (users/plan, faol obuna + taxminiy
+  MRR, content status/engine, sessiyalar — hammasi DB aggregatsiyasi) +
+  `/admin/dashboard` UI (KPI kartalar + breakdown barlar). Review `/admin` da qoladi
+- ✅ Test kontenti: `python manage.py seed_games` — 11 engine bo'yicha 100 ta
+  tayyor o'yin (idempotent, uuid5 + update_or_create, validatordan o'tadi).
+  Test: `test_dashboard.py`
 
 **Keyinga qoldiriladiganlar:**
 - Payme/Click to'lov

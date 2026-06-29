@@ -7,9 +7,11 @@ from .views import (
     MeStatsView,
     MeTeachingStatsView,
     MeView,
+    PlansView,
 )
 
 urlpatterns = [
+    path("plans", PlansView.as_view(), name="plans"),
     path("me", MeView.as_view(), name="me"),
     path("me/stats", MeStatsView.as_view(), name="me-stats"),
     path("me/teaching-stats", MeTeachingStatsView.as_view(), name="me-teaching-stats"),

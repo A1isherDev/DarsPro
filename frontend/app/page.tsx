@@ -71,6 +71,11 @@ export default function HomePage() {
                 Kirish
               </Button>
             </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="ghost">
+                Tariflar
+              </Button>
+            </Link>
           </div>
           <p className="text-sm text-muted-foreground">
             O'quvchimisiz?{" "}

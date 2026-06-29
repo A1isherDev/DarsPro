@@ -95,20 +95,25 @@ DATABASES = {
 # --- Redis: channel layer + cache ---
 REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [REDIS_URL]},
-    },
-}
+# DEV_LOCAL: Redis'siz lokal ishga tushirish (locmem cache + InMemory channel layer).
+# Faqat dev/demo uchun — bitta jarayonda ishlaydi.
+DEV_LOCAL = env.bool("DEV_LOCAL", default=False)
+NO_REDIS = TESTING or DEV_LOCAL
 
-if TESTING:
+if NO_REDIS:
+    CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+    }
     CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        },
+        "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
     }
 else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [REDIS_URL]},
+        },
+    }
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -183,8 +188,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # --- Media (rasmlar) ---
-# Dev: lokal fayl tizimi. Prod: S3-mos storage env orqali ulanadi
-# (DEFAULT_FILE_STORAGE + django-storages). MAX_UPLOAD_MB cheklov.
+# Dev: lokal fayl tizimi. Prod: S3-mos storage (USE_S3=True bo'lsa) — quyida.
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 MAX_UPLOAD_MB = env.int("MAX_UPLOAD_MB", default=5)
@@ -192,6 +196,42 @@ if TESTING:
     import tempfile
 
     MEDIA_ROOT = Path(tempfile.mkdtemp(prefix="darspro_media_"))
+
+# --- Storage backend ---
+# USE_S3=True bo'lsa media fayllar S3-mos storage'ga yoziladi (django-storages).
+# Sukut bo'yicha lokal FileSystemStorage (Django default STORAGES) ishlatiladi.
+# Test rejimida hech qachon S3 ishlatilmaydi.
+USE_S3 = env.bool("USE_S3", default=False) and not TESTING
+if USE_S3:
+    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="")
+    # S3-mos provayderlar uchun (MinIO, Wasabi, DigitalOcean Spaces va h.k.)
+    AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default="") or None
+    AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default="") or None
+    AWS_QUERYSTRING_AUTH = env.bool("AWS_QUERYSTRING_AUTH", default=False)
+    AWS_DEFAULT_ACL = None  # bucket policy boshqaradi
+    STORAGES = {
+        "default": {"BACKEND": "storages.backends.s3.S3Storage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        },
+    }
+
+# --- Email ---
+# Dev: console backend (terminalga chiqaradi). Prod: SMTP env orqali ulanadi.
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL", default="DarsPro <no-reply@darspro.uz>"
+)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
