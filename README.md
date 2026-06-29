@@ -90,3 +90,4 @@ cd frontend && npm run test && npm run build
 6. **Faqat o'zbek tili** — i18n yo'q (MVP soddaligi).
 
 To'liq spetsifikatsiya: [`CLAUDE.md`](CLAUDE.md).
+Owner: @Viltrumlik
