@@ -159,6 +159,14 @@ export interface PlanPricing {
   features: string[];
 }
 
+// — To'lov (POST /api/payments/checkout) —
+export type PaymentProvider = "payme" | "click";
+
+export interface CheckoutResponse {
+  order_id: string;
+  pay_url: string;
+}
+
 // — Admin dashboard statistikasi (GET /api/admin/stats) —
 export interface AdminStats {
   users: {

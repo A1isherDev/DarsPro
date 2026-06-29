@@ -3,13 +3,15 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Check, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge, Card, CardContent } from "@/components/ui/card";
-import { api, apiError } from "@/lib/api";
+import { Spinner } from "@/components/ui/spinner";
+import { api, apiError, tokenStore } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { PlanPricing } from "@/types/api";
+import type { CheckoutResponse, PaymentProvider, PlanPricing } from "@/types/api";
 
 function formatPrice(price: number): string {
   if (price === 0) return "Bepul";
@@ -17,9 +19,12 @@ function formatPrice(price: number): string {
 }
 
 export default function PricingPage() {
+  const router = useRouter();
   const [plans, setPlans] = useState<PlanPricing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openPlan, setOpenPlan] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     api
@@ -28,6 +33,30 @@ export default function PricingPage() {
       .catch((e) => setError(apiError(e)))
       .finally(() => setLoading(false));
   }, []);
+
+  function onBuy(slug: string) {
+    if (!tokenStore.access) {
+      router.push("/login");
+      return;
+    }
+    setError(null);
+    setOpenPlan((cur) => (cur === slug ? null : slug));
+  }
+
+  async function onCheckout(slug: string, provider: PaymentProvider) {
+    setBusy(true);
+    setError(null);
+    try {
+      const { data } = await api.post<CheckoutResponse>("/payments/checkout", {
+        plan: slug,
+        provider,
+      });
+      window.location.href = data.pay_url;
+    } catch (e) {
+      setError(apiError(e));
+      setBusy(false);
+    }
+  }
 
   return (
     <main className="bg-app-gradient min-h-screen">
@@ -112,14 +141,37 @@ export default function PricingPage() {
                       )}
                     </ul>
 
-                    <Button
-                      variant={plan.highlight ? "default" : "outline"}
-                      className="w-full"
-                      disabled
-                      title="To'lov hozircha qo'lda faollashtiriladi"
-                    >
-                      {plan.price === 0 ? "Hozirgi reja" : "Tez kunda"}
-                    </Button>
+                    {plan.price === 0 ? (
+                      <Button variant="outline" className="w-full" disabled>
+                        Hozirgi reja
+                      </Button>
+                    ) : openPlan === plan.slug ? (
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          className="w-full"
+                          disabled={busy}
+                          onClick={() => onCheckout(plan.slug, "payme")}
+                        >
+                          {busy && <Spinner size={16} />} Payme orqali
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          className="w-full"
+                          disabled={busy}
+                          onClick={() => onCheckout(plan.slug, "click")}
+                        >
+                          {busy && <Spinner size={16} />} Click orqali
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        variant={plan.highlight ? "default" : "outline"}
+                        className="w-full"
+                        onClick={() => onBuy(plan.slug)}
+                      >
+                        Sotib olish
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -128,9 +180,9 @@ export default function PricingPage() {
         )}
 
         <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border bg-card/60 p-5 text-center text-sm text-muted-foreground">
-          💳 To'lov tizimi (Payme / Click) tez orada ulanadi. Hozircha pulli
-          tariflar <span className="font-semibold">qo'lda faollashtiriladi</span>{" "}
-          — tarif olish uchun administrator bilan bog'laning.
+          💳 To'lov <span className="font-semibold">Payme</span> yoki{" "}
+          <span className="font-semibold">Click</span> orqali xavfsiz amalga
+          oshiriladi. To'lovdan so'ng tarifingiz avtomatik faollashadi.
         </div>
 
         <div className="mt-8 text-center">

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "apps.content",
     "apps.sessions",
     "apps.admin_panel",
+    "apps.payments",
 ]
 
 MIDDLEWARE = [
@@ -243,6 +244,19 @@ ESKIZ_EMAIL = env("ESKIZ_EMAIL", default="")
 ESKIZ_PASSWORD = env("ESKIZ_PASSWORD", default="")
 SMS_FROM = env("SMS_FROM", default="4546")
 OTP_TTL_SEC = env.int("OTP_TTL_SEC", default=300)
+
+# --- To'lov (Payme + Click) ---
+# Bo'sh qoldirilsa webhook auth yopiq (fail-closed) bo'ladi.
+PAYME_MERCHANT_ID = env("PAYME_MERCHANT_ID", default="")
+PAYME_MERCHANT_KEY = env("PAYME_MERCHANT_KEY", default="")
+PAYME_TEST_KEY = env("PAYME_TEST_KEY", default="")
+PAYME_CHECKOUT_URL = env("PAYME_CHECKOUT_URL", default="https://checkout.paycom.uz")
+CLICK_MERCHANT_ID = env("CLICK_MERCHANT_ID", default="")
+CLICK_SERVICE_ID = env("CLICK_SERVICE_ID", default="")
+CLICK_SECRET_KEY = env("CLICK_SECRET_KEY", default="")
+CLICK_CHECKOUT_URL = env("CLICK_CHECKOUT_URL", default="https://my.click.uz/services/pay")
+PAYMENT_RETURN_URL = env("PAYMENT_RETURN_URL", default="http://localhost:3000/billing/return")
+PAYMENT_PLAN_DURATION_DAYS = env.int("PAYMENT_PLAN_DURATION_DAYS", default=30)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

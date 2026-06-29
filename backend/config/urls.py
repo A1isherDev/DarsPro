@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/content/", include("apps.content.urls")),
     path("api/sessions/", include("apps.sessions.urls")),
     path("api/admin/", include("apps.admin_panel.urls")),
+    path("api/payments/", include("apps.payments.urls")),
 ]
 
 if settings.DEBUG:
